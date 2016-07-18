@@ -82,11 +82,11 @@ export function initialize() {
   function _doSend(message, responseCallback) {
     if (responseCallback) {
       var callbackId = 'cb_' + (uniqueId++) + '_' + new Date().getTime();
-      responseCallbacks.callbackId = responseCallback;
+      responseCallbacks[callbackId] = responseCallback;
       message.callbackId = callbackId;
     }
     if (navigator.product.match(/ReactNative/)) {
-      NativeModules.SCBridge.handler(message,responseCallback);
+      NativeModules.SCBridge.handler(message,_dispatchMessageFromObjC);
     } else if (navigator.userAgent.match(/(iPhone|iPod|iPad)/)) {
       sendMessageQueue.push(message);
       messagingIframe.src = CUSTOM_PROTOCOL_SCHEME + '://' + QUEUE_HAS_MESSAGE;
@@ -109,7 +109,8 @@ export function initialize() {
 
   function _dispatchMessageFromObjC(messageJSON) {
     setTimeout(function _timeoutDispatchMessageFromObjC() {
-      var message = JSON.parse(messageJSON);
+      //var message = JSON.parse(messageJSON);
+      var message = messageJSON;
       var responseCallback;
 
       if (message.responseId) {

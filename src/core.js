@@ -13,7 +13,7 @@
 'use strict';
 /*global WebViewJavascriptBridge*/
 import Rx from 'rx';
-import Commands from './commands';
+import { Commands } from './commands';
 import { initialize } from './bridge.js';
 
 initialize(); //initalize bridge
@@ -41,16 +41,26 @@ connectWebViewJavascriptBridge(function (bridge) {
 let send$ = Rx.Observable.fromCallback(window.WebViewJavascriptBridge.send);
 
 export const authenticate = (user,pass) => window.WebViewJavascriptBridge.send({
-  action: Commands.AUTHSERVICE_AUTHENTICATE,
+  type: Commands.AUTHSERVICE_AUTHENTICATE,
   payload : {email:user,password:pass}
 });
 
-export const xAccessToken$ = () => send$({
-  action : Commands.AUTHSERVICE_ACCESS_TOKEN
-});
+export const xAccessToken$ = () => {
+  let _send$ = Rx.Observable.fromCallback(window.WebViewJavascriptBridge.send);
+  return _send$({
+    type: Commands.AUTHSERVICE_ACCESS_TOKEN
+  });
+};
+
+export const loginStatus$ = () => {
+  let _send$ = Rx.Observable.fromCallback(window.WebViewJavascriptBridge.send);
+  return _send$({
+    type: Commands.AUTHSERVICE_LOGIN_STATUS
+  });
+};
 
 export const logout = () => window.WebViewJavascriptBridge.send({
-  action : Commands.AUTHSERVICE_LOGOUT
+  type : Commands.AUTHSERVICE_LOGOUT
 });
 
 export const startAllServices = () => send$({
@@ -68,14 +78,17 @@ export const disableGPS = () => window.WebViewJavascriptBridge.send({
 });
 
 export const stores$ = () => {
-  return send$({
-    action: Commands.DATASERVICE_ACTIVESTORESLIST
-  });
+   //Rx.Observable.fromCallback(NativeModules.SCBridge.getStores);
+  let _send$ = Rx.Observable.fromCallback(window.WebViewJavascriptBridge.send);
+  // let obs = Rx.Observable.fromCallback(NativeAppEventEmitter.addListener)
+  // return obs$(Commands.DATASERVICE_ACTIVESTORESLIST);
+  return _send$({ type: Commands.DATASERVICE_ACTIVESTORESLIST });
 };
 
 export const forms$ = () => {
-  return send$({
-    action: Commands.DATASERVICE_FORMSLIST
+  let _send$ = Rx.Observable.fromCallback(window.WebViewJavascriptBridge.send);
+  return _send$({
+    type: Commands.DATASERVICE_FORMSLIST
   });
 };
 
